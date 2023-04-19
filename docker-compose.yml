@@ -1,0 +1,17 @@
+version: '3.5'
+services:
+  serverless:
+    container_name: aws-lambda-test
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: aws-lambda-test
+    command:
+        - tail
+        - -f
+        - /dev/null
+    volumes:
+      - node_modules:/home/circleci/project/node_modules
+volumes:
+  node_modules:
+    driver: local

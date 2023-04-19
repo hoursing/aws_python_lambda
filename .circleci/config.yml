@@ -1,0 +1,248 @@
+version: 2.1
+
+orbs:
+  aws-cli: circleci/aws-cli@3.1.4
+  docker: circleci/docker@2.2.0
+
+executors:
+  python:
+    docker:
+      - image: cimg/python:3.9.16
+        auth:
+          username: $DOCKER_USERNAME
+          password: $DOCKER_ACCESS_TOKEN
+        environment:
+          SERVERLESS_VERSION: 2.72.3
+commands:
+  setup_environment:
+    description: "Setup environment variables."
+    steps:
+      - run:
+          name: Setup environment
+          command: |
+            if [ ${CIRCLE_BRANCH} = "production" ]; then
+              echo 'export ENV=prod' >> $BASH_ENV
+            elif [[ ${CIRCLE_BRANCH} =~ staging|hotfix ]] ; then
+              echo 'export ENV=stg' >> $BASH_ENV
+            else
+              echo 'export ENV=dev' >> $BASH_ENV
+            fi
+
+jobs:
+  validation_all:
+    executor:
+      name: python
+    steps:
+      - checkout
+      - run:
+          name: Setup pip
+          command: |
+            pip install -r ${HOME}/project/requirements_test.txt
+      - run:
+          name: Run Validate serverless.yml
+          command: |
+            # Note; findしたserverless.yml
+            find ${HOME}/project/functions/ \
+              -name "serverless.yml" \
+              -exec sh -c "yq -r '.functions| to_entries| \
+                map({ \
+                  timeout:{ \
+                    (.key): .value |has(\"timeout\"), \
+                  }, \
+                  reservedConcurrency:{ \
+                    (.key): .value |has(\"reservedConcurrency\") \
+                  } \
+                }) | .[]' < {} \
+              >> result" \;
+
+            find ${HOME}/project/functions/ \
+              -name "serverless.yml" \
+              -exec sh -c "yq -r '.|{(.service.name): .provider.stackTags}|to_entries| \
+                map({ \
+                  \"Billing Dept\":{ \
+                    (.key): .value |has(\"Billing Dept\"), \
+                  }, \
+                  Role:{ \
+                    (.key): .value |has(\"Role\"), \
+                  }, \
+                  Service:{ \
+                    (.key): .value |has(\"Service\") \
+                  } \
+                }) | .[]' < {} \
+              >> result" \;
+
+            if [ -z "$(cat result |jq -r '.[][] |select(. == false)')" ]; then
+              echo 'Validation OK'
+            else
+              echo 'Validation Error serverless.yml'
+
+              cat result | jq '.timeout'| jq -s '. |add |{timeout: .}'
+              cat result | jq '.reservedConcurrency'| jq -s '. |add |{reservedConcurrency: .}'
+              cat result | jq '."Billing Dept"'| jq -s '. |add |{"stackTags.Billing Dept": .}'
+              cat result | jq '.Role'| jq -s '. |add |{"stackTags.Role": .}'
+              cat result | jq '.Service'| jq -s '. |add |{"stackTags.Service": .}'
+              exit 1
+            fi
+
+  deploy:
+    parameters:
+      target_dir:
+        description: "Specify the directory to deploy"
+        type: string
+      integration_s3event:
+        description: "Specify the integration if create S3 Event"
+        type: boolean
+        default: false
+      get_sls_info_key:
+        description: "Specify enable get the serverless info key"
+        type: string
+        default: ""
+      ssm_parameter_name:
+        description: "Specify put SSM parameter name"
+        type: string
+        default: ""
+    environment:
+      PKG_DIR: python/lib/python3.9/site-packages
+    executor:
+      name: python
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 20.10.18
+      - docker/install-docker-credential-helper
+      - restore_cache:
+          name: Restoring cache (node_modules)
+          keys:
+            - node-module-{{ checksum "package.json" }}
+      - setup_environment
+      - aws-cli/setup
+      - run:
+          name: Setup nodejs
+          command: |
+            sudo apt-get update && sudo apt-get install -y \
+              curl \
+              nodejs \
+              npm
+            sudo npm install n -g
+            sudo n 14.21.1
+            sudo apt purge -y nodejs npm
+      - run:
+          name: Setup Serverless
+          command: |
+            sudo npm i -g serverless@${SERVERLESS_VERSION}
+            sudo chmod +x /usr/local/bin/sls
+            sudo npm install --production
+            echo 'export PATH="~/node_modules/.bin:$PATH"' >> $BASH_ENV
+      - run:
+          name: Create Layers checkSum
+          working_directory: ./<< parameters.target_dir >>/
+          command: |
+            echo `(find ./ -type f -exec md5sum -b {} \; && find ./) | env LC_ALL=C sort | md5sum -b` > ./Cache
+            cp ./Cache ./Cache.env
+            if [[ << parameters.target_dir >> =~ functions ]]; then
+              echo "${ENV}" >> Cache.env
+            fi
+      - restore_cache:
+          name: Restoring cache (CheckSum)
+          keys:
+          - checkSum-cache-v2-{{ checksum "./<< parameters.target_dir >>/Cache" }}
+      - restore_cache:
+          name: Restoring cache (CheckSum.env)
+          keys:
+          - checkSum-env-cache-v2-{{ checksum "./<< parameters.target_dir >>/Cache.env" }}
+      - run:
+          name: Deploy << parameters.target_dir >> by Serverless
+          working_directory: ./<< parameters.target_dir >>/
+          command: |
+            deploy_flag=false
+            if [[ << parameters.target_dir >> =~ functions ]]; then
+              if [ ! -f ./CheckSum.env ]; then
+                deploy_flag=true
+              fi
+            elif [[ << parameters.target_dir >> =~ layers ]]; then
+              if [ ! -f ./CheckSum ]; then
+                if [ -f ./requirements.txt ]; then
+                  pip install -r requirements.txt -t ${PKG_DIR}
+                  cp -r layer/* python
+                fi
+                deploy_flag=true
+              fi
+            fi
+
+            if "${deploy_flag}"; then
+              sls deploy --stage ${ENV}
+
+              if [ << parameters.integration_s3event >> = true ]; then
+                sls s3deploy --stage ${ENV}
+              fi
+
+              mv Cache.env CheckSum.env
+              mv Cache CheckSum
+            else
+             echo 'Already deployed and will be skipped.'
+            fi
+      - when:
+          condition: << parameters.get_sls_info_key >>
+          steps:
+            - run:
+                name: Post processing for deployment << parameters.target_dir >>
+                working_directory: ./<< parameters.target_dir >>/
+                command: |
+                  SSM_PARAMETER_NAME=<< parameters.ssm_parameter_name >>
+                  SSM_INFO_JSON_FILENAME="sls_info.json"
+                  OUTPUT_FILE="output.json"
+                  if [ -n "$SSM_PARAMETER_NAME" ]; then
+                    sls info -j --stage "${ENV}" | \
+                      sed -zr -e 's/(^\{.*\}).*/\1/g'| \
+                      jq "<< parameters.get_sls_info_key >>" | \
+                      sed -e "s/${ENV}-//g" > "${SSM_INFO_JSON_FILENAME}"
+                    if [ << parameters.target_dir >> == "functions" ]; then
+                      jq ". |= .+ {\"4347_diverdown\" : \"$(jq ".diverdown" < ${SSM_INFO_JSON_FILENAME} -r)\"} | del(.diverdown)" < ${SSM_INFO_JSON_FILENAME} > ${OUTPUT_FILE}
+                    else
+                      cp ${SSM_INFO_JSON_FILENAME} ${OUTPUT_FILE}
+                    fi
+                    aws ssm put-parameter \
+                      --name "${SSM_PARAMETER_NAME}"-"${ENV}" \
+                      --value file://"${OUTPUT_FILE}" \
+                      --type SecureString --overwrite
+                  else
+                    echo "Please specify a parameter name."
+                  fi
+      - save_cache:
+          name: Saving cache (CheckSum)
+          paths:
+            - ./<< parameters.target_dir >>/CheckSum
+          key: checkSum-cache-v2-{{ checksum "./<< parameters.target_dir >>/CheckSum" }}
+      - save_cache:
+          name: Saving cache (CheckSum.env)
+          paths:
+            - ./<< parameters.target_dir >>/CheckSum.env
+          key: checkSum-env-cache-v2-{{ checksum "./<< parameters.target_dir >>/CheckSum.env" }}
+      - save_cache:
+          name: Saving cache (node_modules)
+          paths:
+            - ./node_modules
+          key: node-module-{{ checksum "package.json" }}
+
+workflows:
+  lambda:
+    jobs:
+      - validation_all:
+          context: docker-hub-pull-creds
+      - approval_deploy:
+          type: approval
+          filters:
+            branches:
+              only: /^(production|staging.*|hotfix\/.*|develop)$/
+          requires:
+            - validation_all
+      - deploy:
+          name: aws-lambda-test
+          context:
+            - docker-hub-pull-creds
+            -  aws-lambda-test
+          target_dir: functions
+          get_sls_info_key: .info.apiKeys
+          ssm_parameter_name: aws-publisher-report-apikey
+          requires:
+            - approval_deploy
