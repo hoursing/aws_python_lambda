@@ -240,7 +240,7 @@ workflows:
           name: aws-lambda-test
           context:
             - docker-hub-pull-creds
-            -  aws-lambda-test
+            - aws-lambda-test
           target_dir: functions
           get_sls_info_key: .info.apiKeys
           ssm_parameter_name: aws-publisher-report-apikey
