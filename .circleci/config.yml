@@ -181,33 +181,33 @@ jobs:
             else
              echo 'Already deployed and will be skipped.'
             fi
-      - when:
-          condition: << parameters.get_sls_info_key >>
-          steps:
-            - run:
-                name: Post processing for deployment << parameters.target_dir >>
-                working_directory: ./<< parameters.target_dir >>/
-                command: |
-                  SSM_PARAMETER_NAME=<< parameters.ssm_parameter_name >>
-                  SSM_INFO_JSON_FILENAME="sls_info.json"
-                  OUTPUT_FILE="output.json"
-                  if [ -n "$SSM_PARAMETER_NAME" ]; then
-                    sls info -j --stage "${ENV}" | \
-                      sed -zr -e 's/(^\{.*\}).*/\1/g'| \
-                      jq "<< parameters.get_sls_info_key >>" | \
-                      sed -e "s/${ENV}-//g" > "${SSM_INFO_JSON_FILENAME}"
-                    if [ << parameters.target_dir >> == "functions" ]; then
-                      jq ". |= .+ {\"4347_diverdown\" : \"$(jq ".diverdown" < ${SSM_INFO_JSON_FILENAME} -r)\"} | del(.diverdown)" < ${SSM_INFO_JSON_FILENAME} > ${OUTPUT_FILE}
-                    else
-                      cp ${SSM_INFO_JSON_FILENAME} ${OUTPUT_FILE}
-                    fi
-                    aws ssm put-parameter \
-                      --name "${SSM_PARAMETER_NAME}"-"${ENV}" \
-                      --value file://"${OUTPUT_FILE}" \
-                      --type SecureString --overwrite
-                  else
-                    echo "Please specify a parameter name."
-                  fi
+      # - when:
+      #     condition: << parameters.get_sls_info_key >>
+      #     steps:
+      #       - run:
+      #           name: Post processing for deployment << parameters.target_dir >>
+      #           working_directory: ./<< parameters.target_dir >>/
+      #           command: |
+      #             SSM_PARAMETER_NAME=<< parameters.ssm_parameter_name >>
+      #             SSM_INFO_JSON_FILENAME="sls_info.json"
+      #             OUTPUT_FILE="output.json"
+      #             if [ -n "$SSM_PARAMETER_NAME" ]; then
+      #               sls info -j --stage "${ENV}" | \
+      #                 sed -zr -e 's/(^\{.*\}).*/\1/g'| \
+      #                 jq "<< parameters.get_sls_info_key >>" | \
+      #                 sed -e "s/${ENV}-//g" > "${SSM_INFO_JSON_FILENAME}"
+      #               if [ << parameters.target_dir >> == "functions" ]; then
+      #                 jq ". |= .+ {\"4347_diverdown\" : \"$(jq ".diverdown" < ${SSM_INFO_JSON_FILENAME} -r)\"} | del(.diverdown)" < ${SSM_INFO_JSON_FILENAME} > ${OUTPUT_FILE}
+      #               else
+      #                 cp ${SSM_INFO_JSON_FILENAME} ${OUTPUT_FILE}
+      #               fi
+      #               aws ssm put-parameter \
+      #                 --name "${SSM_PARAMETER_NAME}"-"${ENV}" \
+      #                 --value file://"${OUTPUT_FILE}" \
+      #                 --type SecureString --overwrite
+      #             else
+      #               echo "Please specify a parameter name."
+      #             fi
       - save_cache:
           name: Saving cache (CheckSum)
           paths:
@@ -242,7 +242,7 @@ workflows:
             - docker-hub-pull-creds
             - aws-lambda-test
           target_dir: functions
-          get_sls_info_key: .info.apiKeys
-          ssm_parameter_name: aws-publisher-report-apikey
+          # get_sls_info_key: .info.apiKeys
+          # ssm_parameter_name: aws-publisher-report-apikey
           requires:
             - approval_deploy
