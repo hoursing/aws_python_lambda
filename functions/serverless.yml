@@ -5,11 +5,11 @@ provider:
   lambdaHashingVersion: 20201221
   ecr:
     images:
-      y1-test:
+      aws-lambda-test:
         path: ./
 functions:
   hello:
     image:
-      name: y1-test
+      name: aws-lambda-test
       command:
         - app.handler
