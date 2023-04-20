@@ -12,8 +12,15 @@ provider:
     images:
       aws-lambda-test:
         path: ./
+custom:
+  defaultStage: dev
+  functionName: quy-aws-lambda-report
+  config:
+    dev:
+
 functions:
   hello:
+    name: ${self:custom.functionName}_${self:provider.stage}
     image:
       name: aws-lambda-test
       command:
