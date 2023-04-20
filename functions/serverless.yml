@@ -2,7 +2,11 @@ service: aws-container-lambda
 framework Version: "3"
 provider:
   name: aws
-  lambdaHashingVersion: 20201221
+  stage: ${opt:stage, 'dev'}
+  region: ${env:AWS_REGION, 'us-east-1'}
+  deploymentBucket:
+    name: aw-lambda-deploy
+  memorySize: 256
   ecr:
     images:
       aws-lambda-test:
