@@ -5,8 +5,13 @@ provider:
   stage: ${opt:stage, 'dev'}
   region: ${env:AWS_REGION, 'us-east-1'}
   deploymentBucket:
-    name: aw-lambda-deploy
+    name: aw-lambda-test-deploy
   memorySize: 256
+  stackName: ${self:service}-${self:provider.stage}
+  stackTags:
+    Billing Dept: quy-dev
+    Role: ${self:service}
+    Service: QuyAWSLambda
   ecr:
     images:
       aws-lambda-test:
