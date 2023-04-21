@@ -6,9 +6,9 @@ FROM public.ecr.aws/lambda/python:3.7
 # Layer code
 WORKDIR /opt
 
-COPY ./layer/* .
+COPY ./layer/ .
 COPY ./requirements.txt .
-RUN  pip3 install -r requirements.txt --target "/opt/extensions/lib"
+RUN  pip3 install -r requirements.txt --target /opt/extensions/lib
 
 
 # Copy lambda
