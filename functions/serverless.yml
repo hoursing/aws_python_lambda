@@ -11,7 +11,7 @@ provider:
   ecr: #config upload ECR
     images:
       aws-lambda-test:
-        path: ./Dockerfile
+        path: ./
 custom:
   defaultStage: dev
   functionName: quy-aws-lambda-report
@@ -25,6 +25,5 @@ functions:
       name: aws-lambda-test
       command:
         - app.handler
-      timeout: 30
       tags:
         Environment: dev
