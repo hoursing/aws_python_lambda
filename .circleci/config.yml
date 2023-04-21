@@ -245,4 +245,4 @@ workflows:
           # get_sls_info_key: .info.apiKeys
           # ssm_parameter_name: aws-publisher-report-apikey
           requires:
-            - approval_deploy
+            - approval_deploy # When Administrator Approve on Circle CI
