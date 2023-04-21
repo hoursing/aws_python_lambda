@@ -22,6 +22,6 @@ functions:
   hello:
     name: ${self:custom.functionName}_${self:provider.stage}
     image:
-      name: aws-lambda-test
+      name: aws-lambda-test/:latest
       command:
         - app.handler
