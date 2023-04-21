@@ -8,10 +8,10 @@ provider:
     name: aw-lambda-test-deploy
   memorySize: 256
   stackName: ${self:service}-${self:provider.stage}
-  ecr:
+  ecr: #config upload ECR
     images:
       aws-lambda-test:
-        path: ./
+        path: ./Dockerfile
 custom:
   defaultStage: dev
   functionName: quy-aws-lambda-report
@@ -25,3 +25,6 @@ functions:
       name: aws-lambda-test
       command:
         - app.handler
+      timeout: 30
+      tags:
+        Environment: dev
