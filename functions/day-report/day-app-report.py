@@ -5,4 +5,4 @@ test = Test("Hello world DAY Report")
 
 def day_handler(event, context):
     test.getName()
-    return 'Xin chao from AWS Lambda using Python' + sys.version + '!'
+    return 'Xin chao Day report from AWS Lambda using Python' + sys.version + '!'
