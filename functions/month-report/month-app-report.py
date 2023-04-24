@@ -1,7 +1,7 @@
 import sys
 from demo.test_layer import Test
 
-test = Test("Hello world Test")
+test = Test("Hello world MONTH report")
 
 def handler(event, context):
     test.getName()

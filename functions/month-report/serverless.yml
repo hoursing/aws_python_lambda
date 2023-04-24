@@ -1,0 +1,37 @@
+service: aws-container-lambda
+framework Version: "3"
+provider:
+  name: aws
+  stage: ${opt:stage, 'dev'}
+  region: ${env:AWS_REGION, 'us-east-1'}
+  deploymentBucket:
+    name: aw-lambda-test-deploy
+  memorySize: 256
+  stackName: ${self:service}-${self:provider.stage}
+  ecr: #config upload ECR
+    images:
+      aws-lambda-test:
+        path: ./
+custom:
+  defaultStage: dev
+  functionName: quy-lambda-month-report
+  config:
+    dev:
+
+functions:
+  hello:
+    name: ${self:custom.functionName}_${self:provider.stage}
+    image:
+      name: aws-lambda-test
+      command:
+        - day/app.handler
+      tags:
+        Environment: dev
+  hello:
+    name: ${self:custom.functionName}_${self:provider.stage}
+    image:
+      name: aws-lambda-test
+      command:
+        - month/app.handler
+      tags:
+        Environment: dev
