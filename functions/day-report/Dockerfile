@@ -8,7 +8,6 @@ WORKDIR ${LAMBDA_TASK_ROOT}
 
 # COPY ./../layer/ .
 # COPY ./../requirements.txt .
-RUN  pip3 install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
 
-# Copy function code
 COPY . ${LAMBDA_TASK_ROOT}
+RUN  pip3 install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
