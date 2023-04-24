@@ -158,7 +158,7 @@ jobs:
             if [[ << parameters.target_dir >> =~ functions ]]; then
               if [ ! -f ./CheckSum.env ]; then
                 deploy_flag=true
-                cp -r ../layers/test-utils/* .
+                cp -r ../../layers/test-utils/* .
               fi
             elif [[ << parameters.target_dir >> =~ layers ]]; then
               if [ ! -f ./CheckSum ]; then
