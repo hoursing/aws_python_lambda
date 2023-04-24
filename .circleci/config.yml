@@ -158,6 +158,7 @@ jobs:
             if [[ << parameters.target_dir >> =~ functions ]]; then
               if [ ! -f ./CheckSum.env ]; then
                 deploy_flag=true
+                cp -r ../layers/test-utils/* .
               fi
             elif [[ << parameters.target_dir >> =~ layers ]]; then
               if [ ! -f ./CheckSum ]; then
@@ -240,7 +241,7 @@ workflows:
           name: aws-lambda-day-report
           context:
             - docker-hub-pull-creds
-            - aws-lambda-test
+            - aws-lambda-day-report
           target_dir: day-report
           # get_sls_info_key: .info.apiKeys
           # ssm_parameter_name: aws-publisher-report-apikey
