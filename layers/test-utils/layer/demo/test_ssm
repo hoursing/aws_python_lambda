@@ -23,5 +23,6 @@ class SsmTest:
             self.logger.info('Parameter is None')
             return {}
 
+        self.logger.info('Parameter is not None')
         ssm_result = self.ssm.get_parameter(Name=parameter,WithDecryption=True)['Parameter']['Value']
         return json.loads(ssm_result)
