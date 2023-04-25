@@ -4,7 +4,7 @@ service: quy-lambda-utils
 provider:
   name: aws
   runtime: python3.9
-  region: ap-northeast-1
+  region: us-east-1
   deploymentBucket:
     name: aw-lambda-test-deploy
   stackName: ${self:service}
