@@ -18,6 +18,7 @@ custom:
   functionName: quy-lambda-day-report
   config:
     dev:
+      stage_formal: development
 
 functions:
   day-report:
@@ -27,4 +28,4 @@ functions:
       command:
         - day-app-report.day_handler
       tags:
-        Environment: dev
+        Environment: ${self:custom.config.${self:provider.stage}.stage_formal}
