@@ -18,7 +18,7 @@ custom:
   functionName: quy-lambda-day-report
   config:
     dev:
-      stage_formal: development
+      stage_formal: dev
 
 functions:
   day-report:
@@ -27,5 +27,5 @@ functions:
       name: aws-lambda-day-report
       command:
         - day-app-report.day_handler
-      tags:
-        Environment: ${self:custom.config.${self:provider.stage}.stage_formal}
+    tags:
+      Environment: ${self:custom.config.${self:provider.stage}.stage_formal}
