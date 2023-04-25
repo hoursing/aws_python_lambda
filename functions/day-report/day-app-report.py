@@ -8,6 +8,6 @@ ssmTest = SsmTest()
 
 def day_handler(event, context):
     test.getName()
-    
+
     ssmTest.get_by_dict(os.getenv('TEST_LIST_PARAMETER'))
-    return 'Xin chao Day report from AWS Lambda using Python' + sys.version + '!'
+    return 'Xin chao TEST_LIST_PARAMETER report from AWS Lambda using Python' + sys.version + '!'
