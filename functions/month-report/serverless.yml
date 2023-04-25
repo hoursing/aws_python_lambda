@@ -32,6 +32,6 @@ functions:
     image:
       name: aws-lambda-test
       command:
-        - month/app.handler
+        - month-app-report/app.handler
       tags:
         Environment: dev

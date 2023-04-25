@@ -12,6 +12,7 @@ provider:
     images:
       aws-lambda-day-report:
         path: ./
+      
 custom:
   defaultStage: dev
   functionName: quy-lambda-day-report
