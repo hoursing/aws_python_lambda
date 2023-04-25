@@ -154,6 +154,8 @@ jobs:
           name: Deploy << parameters.target_dir >> by Serverless
           working_directory: ./<< parameters.target_dir >>/
           command: |
+            mv Cache.env CheckSum.env
+            mv Cache CheckSum
             deploy_flag=false
             if [[ << parameters.target_dir >> =~ functions ]]; then
               if [ ! -f ./CheckSum.env ]; then
@@ -247,13 +249,3 @@ workflows:
           # ssm_parameter_name: aws-publisher-report-apikey
           requires:
             - approval_deploy # When Administrator Approve on Circle CI
-      # - deploy:
-      #     name: test-utils
-      #     context:
-      #       - docker-hub-pull-creds
-      #       - aws-lambda-test
-      #     target_dir: layers/test-utils
-      #     # get_sls_info_key: .info.apiKeys
-      #     # ssm_parameter_name: aws-publisher-report-apikey
-      #     requires:
-      #       - approval_deploy # When Administrator Approve on Circle CI
