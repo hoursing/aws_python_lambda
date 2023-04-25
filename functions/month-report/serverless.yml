@@ -10,7 +10,7 @@ provider:
   stackName: ${self:service}-${self:provider.stage}
   ecr: #config upload ECR
     images:
-      aws-lambda-test:
+      aws-lambda-month:
         path: ./
 custom:
   defaultStage: dev
@@ -19,19 +19,11 @@ custom:
     dev:
 
 functions:
-  hello:
+  day-report:
     name: ${self:custom.functionName}_${self:provider.stage}
     image:
-      name: aws-lambda-test
+      name: aws-lambda-month
       command:
-        - day/app.handler
-      tags:
-        Environment: dev
-  hello:
-    name: ${self:custom.functionName}_${self:provider.stage}
-    image:
-      name: aws-lambda-test
-      command:
-        - month-app-report/app.handler
+        - month-app-report.handler
       tags:
         Environment: dev
