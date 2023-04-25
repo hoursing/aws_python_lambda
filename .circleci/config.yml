@@ -154,7 +154,18 @@ jobs:
           name: Deploy << parameters.target_dir >> by Serverless
           working_directory: ./<< parameters.target_dir >>/
           command: |
-            deploy_flag=true
+            if [[ << parameters.target_dir >> =~ functions ]]; then
+              deploy_flag=true
+              cp -r ../../layers/test-utils/* .
+            elif [[ << parameters.target_dir >> =~ layers ]]; then
+              if [ ! -f ./CheckSum ]; then
+                if [ -f ./requirements.txt ]; then
+                  pip install -r requirements.txt -t ${PKG_DIR}
+                  cp -r layer/* python
+                fi
+                deploy_flag=true
+              fi
+            fi
 
             if "${deploy_flag}"; then
               sls deploy --stage ${ENV}
