@@ -167,18 +167,15 @@ jobs:
               fi
             fi
 
-            if "${deploy_flag}"; then
-              sls deploy --stage ${ENV}
+            sls deploy --stage ${ENV}
 
-              if [ << parameters.integration_s3event >> = true ]; then
-                sls s3deploy --stage ${ENV}
-              fi
-
-              mv Cache.env CheckSum.env
-              mv Cache CheckSum
-            else
-             echo 'Already deployed and will be skipped.'
+            if [ << parameters.integration_s3event >> = true ]; then
+              sls s3deploy --stage ${ENV}
             fi
+
+            mv Cache.env CheckSum.env
+            mv Cache CheckSum
+           
       - when:
           condition: << parameters.get_sls_info_key >>
           steps:
