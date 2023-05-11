@@ -156,7 +156,9 @@ jobs:
           command: |
             if [[ << parameters.target_dir >> =~ functions ]]; then
               deploy_flag=true
-              cp -r ../../layers/test-utils/* .
+              cp -r ../../layers/test-utils/layer/* .
+              cp ../../layers/test-utils/requirements.txt .
+
             elif [[ << parameters.target_dir >> =~ layers ]]; then
               if [ ! -f ./CheckSum ]; then
                 if [ -f ./requirements.txt ]; then
