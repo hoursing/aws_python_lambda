@@ -10,7 +10,7 @@ provider:
   stackName: ${self:service}-${self:provider.stage}
   ecr: #config upload ECR
     images:
-      aws-lambda-day-report:
+      test/aws-lambda-day-report:
         path: ./
       
 custom:
@@ -24,7 +24,7 @@ functions:
   day-report:
     name: ${self:custom.functionName}_${self:provider.stage}
     image:
-      name: aws-lambda-day-report
+      name: test/aws-lambda-day-report
       command:
         - day-app-report.day_handler
     tags:
