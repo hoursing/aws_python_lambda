@@ -154,11 +154,11 @@ jobs:
           name: Deploy << parameters.target_dir >> by Serverless
           working_directory: ./<< parameters.target_dir >>/
           command: |
-            deploy_flag=false
             if [[ << parameters.target_dir >> =~ functions ]]; then
-              if [ ! -f ./CheckSum.env ]; then
-                deploy_flag=true
-              fi
+              deploy_flag=true
+              cp -r ../../layers/test-utils/layer/* .
+              cp ../../layers/test-utils/requirements.txt .
+
             elif [[ << parameters.target_dir >> =~ layers ]]; then
               if [ ! -f ./CheckSum ]; then
                 if [ -f ./requirements.txt ]; then
@@ -169,18 +169,15 @@ jobs:
               fi
             fi
 
-            if "${deploy_flag}"; then
-              sls deploy --stage ${ENV}
+            sls deploy --stage ${ENV}
 
-              if [ << parameters.integration_s3event >> = true ]; then
-                sls s3deploy --stage ${ENV}
-              fi
-
-              mv Cache.env CheckSum.env
-              mv Cache CheckSum
-            else
-             echo 'Already deployed and will be skipped.'
+            if [ << parameters.integration_s3event >> = true ]; then
+              sls s3deploy --stage ${ENV}
             fi
+
+            mv Cache.env CheckSum.env
+            mv Cache CheckSum
+           
       - when:
           condition: << parameters.get_sls_info_key >>
           steps:
@@ -237,12 +234,32 @@ workflows:
           requires:
             - validation_all
       - deploy:
-          name: aws-lambda-test
+          name: aws-lambda-day-report
           context:
             - docker-hub-pull-creds
-            -  aws-lambda-test
-          target_dir: functions
-          get_sls_info_key: .info.apiKeys
-          ssm_parameter_name: aws-publisher-report-apikey
+            - aws-lambda-test
+          target_dir: functions/day-report
+          # get_sls_info_key: .info.apiKeys
+          # ssm_parameter_name: aws-publisher-report-apikey
           requires:
-            - approval_deploy
+            - approval_deploy # When Administrator Approve on Circle CI
+      - deploy:
+          name: aws-lambda-month-report
+          context:
+            - docker-hub-pull-creds
+            - aws-lambda-test
+          target_dir: functions/month-report
+          # get_sls_info_key: .info.apiKeys
+          # ssm_parameter_name: aws-publisher-report-apikey
+          requires:
+            - approval_deploy # When Administrator Approve on Circle CI
+      # - deploy:
+      #     name: test-utils
+      #     context:
+      #       - docker-hub-pull-creds
+      #       - aws-lambda-test
+      #     target_dir: layers/test-utils
+      #     # get_sls_info_key: .info.apiKeys
+      #     # ssm_parameter_name: aws-publisher-report-apikey
+      #     requires:
+      #       - approval_deploy # When Administrator Approve on Circle CI

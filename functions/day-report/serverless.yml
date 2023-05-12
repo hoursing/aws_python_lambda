@@ -1,0 +1,35 @@
+service: aws-container-lambda
+framework Version: "3"
+provider:
+  name: aws
+  stage: ${opt:stage, 'dev'}
+  region: ${env:AWS_REGION, 'us-east-1'}
+  deploymentBucket:
+    name: aw-lambda-test-deploy
+  memorySize: 256
+  stackName: ${self:service}-${self:provider.stage}
+  environment:
+    ENV: ${opt:stage, self:custom.defaultStage}
+  ecr: #config upload ECR
+    images:
+      aws-lambda-day-report:
+        path: ./
+      
+custom:
+  defaultStage: dev
+  functionName: quy-lambda-day-report
+  config:
+    dev:
+      stage_formal: dev
+    stg:
+      stage_formal: staging
+
+functions:
+  day-report:
+    name: ${self:custom.functionName}_${self:provider.stage}
+    image:
+      name: aws-lambda-day-report
+      command:
+        - day-app-report.day_handler
+    tags:
+      Environment: ${self:custom.config.${self:provider.stage}.stage_formal}

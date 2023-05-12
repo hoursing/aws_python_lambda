@@ -1,0 +1,19 @@
+service: quy-lambda-utils
+
+
+provider:
+  name: aws
+  runtime: python3.9
+  region: us-east-1
+  deploymentBucket:
+    name: aw-lambda-test-deploy
+  stackName: ${self:service}
+
+layers:
+  utils:
+    name: ${self:service}
+    description: ""
+    path: ./
+    compatibleRuntimes:
+      - python3.9
+    retain: true
