@@ -8,9 +8,11 @@ provider:
     name: aw-lambda-test-deploy
   memorySize: 256
   stackName: ${self:service}-${self:provider.stage}
+  environment:
+    ENV: ${opt:stage, self:custom.defaultStage}
   ecr: #config upload ECR
     images:
-      test/aws-lambda-day-report:
+      aws-lambda-day-report:
         path: ./
       
 custom:
@@ -19,12 +21,14 @@ custom:
   config:
     dev:
       stage_formal: dev
+    stg:
+      stage_formal: staging
 
 functions:
   day-report:
     name: ${self:custom.functionName}_${self:provider.stage}
     image:
-      name: test/aws-lambda-day-report
+      name: aws-lambda-day-report
       command:
         - day-app-report.day_handler
     tags:
