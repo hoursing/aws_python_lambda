@@ -1,4 +1,4 @@
-service: aws-container-lambda
+service: test-lambda-month-report
 framework Version: "3"
 provider:
   name: aws
