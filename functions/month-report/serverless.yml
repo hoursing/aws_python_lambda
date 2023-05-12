@@ -8,6 +8,8 @@ provider:
     name: aw-lambda-test-deploy
   memorySize: 256
   stackName: ${self:service}-${self:provider.stage}
+  environment:
+    ENV: ${opt:stage, self:custom.defaultStage}
   ecr: #config upload ECR
     images:
       aws-lambda-month:
@@ -17,6 +19,9 @@ custom:
   functionName: quy-lambda-month-report
   config:
     dev:
+      stage_formal: dev
+    stg:
+      stage_formal: staging
 
 functions:
   day-report:
