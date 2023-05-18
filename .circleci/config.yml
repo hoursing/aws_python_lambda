@@ -161,7 +161,10 @@ jobs:
 
               if [ ! -f ./requirements.txt ]; then
                   touch requirements.txt
+                  echo 'Created requirements.txt'
               fi
+
+              echo 'Not created requirements.txt'
 
             elif [[ << parameters.target_dir >> =~ layers ]]; then
               if [ ! -f ./CheckSum ]; then
