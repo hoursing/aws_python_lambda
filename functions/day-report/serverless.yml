@@ -1,5 +1,10 @@
 service: test-lambda-day-report
 framework Version: "3"
+
+plugins:
+  - serverless-plugin-resource-tagging
+  - serverless-python-requirements
+
 provider:
   name: aws
   stage: ${opt:stage, 'dev'}
