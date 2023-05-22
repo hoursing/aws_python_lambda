@@ -256,11 +256,6 @@ jobs:
           paths:
             - ./node_modules
           key: node-module-{{ checksum "package.json" }}
-      - build_and_push_image_ecr:
-          target_dir: << parameters.target_dir >>
-          docker_file_path: ./Dockerfile
-          image_name:
-          image_tag:  ${CHECKSUM}
 
 workflows:
   lambda:
@@ -274,6 +269,13 @@ workflows:
               only: /^(production|staging.*|hotfix\/.*|develop)$/
           requires:
             - validation_all
+      - build_and_push_image_ecr:
+          target_dir: functions
+          docker_file_path: ./Dockerfile
+          image_name: aws-img-lambda
+          image_tag: ${CHECKSUM}
+          requires:
+            - approval_deploy
       - deploy:
           name: aws-lambda-day-report
           context:
@@ -283,7 +285,7 @@ workflows:
           # get_sls_info_key: .info.apiKeys
           # ssm_parameter_name: aws-publisher-report-apikey
           requires:
-            - approval_deploy # When Administrator Approve on Circle CI
+            - build_and_push_image_ecr # When Administrator Approve on Circle CI
       - deploy:
           name: aws-lambda-month-report
           context:
@@ -293,14 +295,4 @@ workflows:
           # get_sls_info_key: .info.apiKeys
           # ssm_parameter_name: aws-publisher-report-apikey
           requires:
-            - approval_deploy # When Administrator Approve on Circle CI
-      # - deploy:
-      #     name: test-utils
-      #     context:
-      #       - docker-hub-pull-creds
-      #       - aws-lambda-test
-      #     target_dir: layers/test-utils
-      #     # get_sls_info_key: .info.apiKeys
-      #     # ssm_parameter_name: aws-publisher-report-apikey
-      #     requires:
-      #       - approval_deploy # When Administrator Approve on Circle CI
+            - build_and_push_image_ecr # When Administrator Approve on Circle CI
