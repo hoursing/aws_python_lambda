@@ -27,6 +27,42 @@ commands:
             else
               echo 'export ENV=dev' >> $BASH_ENV
             fi
+  build_and_push_image_ecr:
+    description: "Build the Docker image and push the Docker image to ECR."
+    parameters:
+      <<: *parameter_target_dir
+      docker_file_path:
+        description: The Dockerfile path
+        type: string
+        default: ./Dockerfile
+      image_name:
+        description: The Docker image name
+        type: string
+      image_tag:
+        description: The Docker image tag to add
+        type: string
+    steps:
+      - run:
+          name: Build the image and push the image to ECR.
+          working_directory: ./<< parameters.target_dir >>/
+          command: |
+            ECR_URI=${ECR_BASE_URI}/${GIT_REPONAME}/<< parameters.image_name >>
+            check=$(aws ecr list-images --repository-name ${GIT_REPONAME}/<< parameters.image_name >> --query "imageIds[*].imageTag" | jq '.[] | select(contains("'<< parameters.image_tag >>'"))')
+
+            if [ -z "${check}" ]; then
+              aws ecr get-login-password | docker login --username AWS --password-stdin ${ECR_BASE_URI}
+              echo "Build << parameters.image_name >> image from << parameters.docker_file_path >>."
+              docker build \
+                -t ${ECR_URI}:<< parameters.image_tag >> \
+                -f << parameters.docker_file_path >> .
+              docker tag \
+                ${ECR_URI}:<< parameters.image_tag >> \
+                ${ECR_URI}:latest
+              docker push ${ECR_URI} -a
+              echo "${GIT_REPONAME}/<< parameters.image_name >>:<< parameters.image_tag >> pushed to ECR successfully."
+            else
+              echo "${GIT_REPONAME}/<< parameters.image_name >> :<< parameters.image_tag >> is already exists to ECR."
+            fi
 
 jobs:
   validation_all:
@@ -220,6 +256,11 @@ jobs:
           paths:
             - ./node_modules
           key: node-module-{{ checksum "package.json" }}
+      - build_and_push_image_ecr:
+          target_dir: << parameters.target_dir >>
+          docker_file_path: ./Dockerfile
+          image_name:
+          image_tag:  ${CHECKSUM}
 
 workflows:
   lambda:
