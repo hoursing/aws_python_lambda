@@ -134,7 +134,9 @@ jobs:
       name: default
     steps:
       - checkout
-      - setup_docker
+      - setup_remote_docker:
+          version: 20.10.18
+      - docker/install-docker-credential-helper
       - aws-cli/setup
       - create_checksum:
           target_dir: << parameters.target_dir >>
