@@ -30,7 +30,9 @@ commands:
   build_and_push_image_ecr:
     description: "Build the Docker image and push the Docker image to ECR."
     parameters:
-      <<: *parameter_target_dir
+      target_dir:
+        description: "Specify the directory to deploy"
+        type: string
       docker_file_path:
         description: The Dockerfile path
         type: string
