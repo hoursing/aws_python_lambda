@@ -291,6 +291,8 @@ workflows:
           context:
             - docker-hub-pull-creds
             - aws-lambda-test
+          target_dir: functions
+          service_name: y1-lambda
       - approval_deploy:
           type: approval
           filters:
