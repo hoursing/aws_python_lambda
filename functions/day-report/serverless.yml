@@ -10,11 +10,7 @@ provider:
   stackName: ${self:service}-${self:provider.stage}
   environment:
     ENV: ${opt:stage, self:custom.defaultStage}
-  ecr: #config upload ECR
-    images:
-      aws-lambda-day-report:
-        path: ./
-      
+
 custom:
   defaultStage: dev
   functionName: quy-lambda-day-report
@@ -27,9 +23,4 @@ custom:
 functions:
   day-report:
     name: ${self:custom.functionName}_${self:provider.stage}
-    image:
-      name: aws-lambda-day-report
-      command:
-        - day-app-report.day_handler
-    tags:
-      Environment: ${self:custom.config.${self:provider.stage}.stage_formal}
+    image: y1-lambda.dkr.ecr..amazonaws.com/@
