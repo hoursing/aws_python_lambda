@@ -1,4 +1,4 @@
-service: test-lambda
+service: test-lambda-month-report
 framework Version: "3"
 provider:
   name: aws
@@ -7,7 +7,7 @@ provider:
   deploymentBucket:
     name: aw-lambda-test-deploy
   memorySize: 256
-  stackName: ${self:service}-${self:provider.stage}
+  stackName: test-lambda-${self:provider.stage}
   environment:
     ENV: ${opt:stage, self:custom.defaultStage}
   ecr: #config upload ECR
