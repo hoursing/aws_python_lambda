@@ -158,7 +158,7 @@ jobs:
       - docker/install-docker-credential-helper
       - aws-cli/setup
       - create_checksum:
-          image_name: << parameters.service_name >>
+          target_dir: << parameters.target_dir >>
       - build_and_push_image_ecr:
           target_dir: << parameters.target_dir >>
           docker_file_path: ./Dockerfile
