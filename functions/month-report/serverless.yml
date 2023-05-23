@@ -7,7 +7,7 @@ provider:
   deploymentBucket:
     name: aw-lambda-test-deploy
   memorySize: 256
-  stackName: test-lambda-${self:provider.stage}
+  stackName: test-lambda-month-report-${self:provider.stage}
   environment:
     ENV: ${opt:stage, self:custom.defaultStage}
   ecr: #config upload ECR
