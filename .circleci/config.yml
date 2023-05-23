@@ -31,6 +31,21 @@ commands:
               echo 'export ENV=dev' >> $BASH_ENV
             fi
 
+  create_checksum:
+    parameters:
+      target_dir:
+        description: "Specify the directory to create check sum"
+        type: string
+    steps:
+      - run:
+          name: Create CheckSum
+          working_directory: ~/work/y1-tools/<< parameters.target_dir >>/
+          command: |
+            SEED=/tmp/checksum-seed
+            find ./ -type f -exec sha256sum {} \; | sort -k 2 > $SEED
+            CHECKSUM=$(cat $SEED | sha256sum | awk '{ print $1 }')
+            echo "export CHECKSUM=${CHECKSUM}" >> $BASH_ENV
+
   build_and_push_image_ecr:
     description: "Build the Docker image and push the Docker image to ECR."
     parameters:
@@ -142,6 +157,8 @@ jobs:
           version: 20.10.18
       - docker/install-docker-credential-helper
       - aws-cli/setup
+      - create_checksum:
+          image_name: << parameters.service_name >>
       - build_and_push_image_ecr:
           target_dir: << parameters.target_dir >>
           docker_file_path: ./Dockerfile
