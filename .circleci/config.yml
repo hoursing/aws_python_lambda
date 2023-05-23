@@ -53,7 +53,7 @@ commands:
           working_directory: ./<< parameters.target_dir >>/
           command: |
             ECR_URI=${ECR_BASE_URI}/${GIT_REPONAME}/<< parameters.image_name >>
-            check=$(aws ecr list-images --repository-name ${GIT_REPONAME}/<< parameters.image_name >> --query "imageIds[*].imageTag" | jq '.[] | select(contains("'<< parameters.image_tag >>'"))')
+            check=$(aws ecr list-images --repository-name ${GIT_REPONAME}/<< parameters.image_name >> --region us-east-1 --query "imageIds[*].imageTag" | jq '.[] | select(contains("'<< parameters.image_tag >>'"))')
 
             if [ -z "${check}" ]; then
               aws ecr get-login-password | docker login --username AWS --password-stdin ${ECR_BASE_URI}
@@ -322,7 +322,6 @@ workflows:
           # get_sls_info_key: .info.apiKeys
           # ssm_parameter_name: aws-publisher-report-apikey
           requires:
-            - approval_deploy
             - build_aws_lambda # When Administrator Approve on Circle CI
       - deploy:
           name: aws-lambda-month-report
@@ -333,5 +332,4 @@ workflows:
           # get_sls_info_key: .info.apiKeys
           # ssm_parameter_name: aws-publisher-report-apikey
           requires:
-            - approval_deploy
             - build_aws_lambda # When Administrator Approve on Circle CI
