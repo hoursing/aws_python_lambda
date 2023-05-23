@@ -135,7 +135,7 @@ jobs:
         description: "Specify the service name to deploy"
         type: string
     executor:
-      name: default
+      name: python
     steps:
       - checkout
       - setup_remote_docker:
