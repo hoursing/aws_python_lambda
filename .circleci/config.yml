@@ -302,7 +302,7 @@ workflows:
             - docker-hub-pull-creds
             - aws-lambda-test
           target_dir: functions
-          service_name: y1-lambda
+          service_name: test-lambda
           requires:
             - approval_deploy
       - deploy:

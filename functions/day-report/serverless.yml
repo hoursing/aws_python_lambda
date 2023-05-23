@@ -23,4 +23,7 @@ custom:
 functions:
   day-report:
     name: ${self:custom.functionName}_${self:provider.stage}
-    image: y1-lambda.dkr.ecr..amazonaws.com/@
+    image:
+      uri: 376206943201.dkr.ecr.376206943201.amazonaws.com/test-tools/test-lambda@latest
+      workingDirectory: /day-report
+      command: day-app-report.day_handler
