@@ -14,7 +14,7 @@ executors:
         environment:
           SERVERLESS_VERSION: 2.72.3
           GIT_REPONAME: test-tools
-          ECR_BASE_URI: 376206943201.dkr.ecr.376206943201.amazonaws.com
+          ECR_BASE_URI: 376206943201.dkr.ecr.us-east-1.amazonaws.com #need config
 
 commands:
   setup_environment:
