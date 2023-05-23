@@ -13,6 +13,9 @@ executors:
           password: $DOCKER_ACCESS_TOKEN
         environment:
           SERVERLESS_VERSION: 2.72.3
+          GIT_REPONAME: test-tools
+          ECR_BASE_URI: 376206943201.dkr.ecr.376206943201.amazonaws.com
+
 commands:
   setup_environment:
     description: "Setup environment variables."
@@ -26,6 +29,45 @@ commands:
               echo 'export ENV=stg' >> $BASH_ENV
             else
               echo 'export ENV=dev' >> $BASH_ENV
+            fi
+
+  build_and_push_image_ecr:
+    description: "Build the Docker image and push the Docker image to ECR."
+    parameters:
+      target_dir:
+        description: "Specify the directory to deploy"
+        type: string
+      docker_file_path:
+        description: The Dockerfile path
+        type: string
+        default: ./Dockerfile
+      image_name:
+        description: The Docker image name
+        type: string
+      image_tag:
+        description: The Docker image tag to add
+        type: string
+    steps:
+      - run:
+          name: Build the image and push the image to ECR.
+          working_directory: ./<< parameters.target_dir >>/
+          command: |
+            ECR_URI=${ECR_BASE_URI}/${GIT_REPONAME}/<< parameters.image_name >>
+            check=$(aws ecr list-images --repository-name ${GIT_REPONAME}/<< parameters.image_name >> --query "imageIds[*].imageTag" | jq '.[] | select(contains("'<< parameters.image_tag >>'"))')
+
+            if [ -z "${check}" ]; then
+              aws ecr get-login-password | docker login --username AWS --password-stdin ${ECR_BASE_URI}
+              echo "Build << parameters.image_name >> image from << parameters.docker_file_path >>."
+              docker build \
+                -t ${ECR_URI}:<< parameters.image_tag >> \
+                -f << parameters.docker_file_path >> .
+              docker tag \
+                ${ECR_URI}:<< parameters.image_tag >> \
+                ${ECR_URI}:latest
+              docker push ${ECR_URI} -a
+              echo "${GIT_REPONAME}/<< parameters.image_name >>:<< parameters.image_tag >> pushed to ECR successfully."
+            else
+              echo "${GIT_REPONAME}/<< parameters.image_name >> :<< parameters.image_tag >> is already exists to ECR."
             fi
 
 jobs:
@@ -83,6 +125,28 @@ jobs:
               cat result | jq '.Service'| jq -s '. |add |{"stackTags.Service": .}'
               exit 1
             fi
+
+  build:
+    parameters:
+      target_dir:
+        description: "Specify the directory to deploy"
+        type: string
+      service_name:
+        description: "Specify the service name to deploy"
+        type: string
+    executor:
+      name: python
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 20.10.18
+      - docker/install-docker-credential-helper
+      - aws-cli/setup
+      - build_and_push_image_ecr:
+          target_dir: << parameters.target_dir >>
+          docker_file_path: ./Dockerfile
+          image_name: << parameters.service_name >>
+          image_tag: ${CHECKSUM}
 
   deploy:
     parameters:
@@ -240,6 +304,15 @@ workflows:
               only: /^(production|staging.*|hotfix\/.*|develop)$/
           requires:
             - validation_all
+      - build:
+          name: build_aws_lambda
+          context:
+            - docker-hub-pull-creds
+            - aws-lambda-test
+          target_dir: functions
+          service_name: test-lambda
+          requires:
+            - approval_deploy
       - deploy:
           name: aws-lambda-day-report
           context:
@@ -249,7 +322,8 @@ workflows:
           # get_sls_info_key: .info.apiKeys
           # ssm_parameter_name: aws-publisher-report-apikey
           requires:
-            - approval_deploy # When Administrator Approve on Circle CI
+            - approval_deploy
+            - build_aws_lambda # When Administrator Approve on Circle CI
       - deploy:
           name: aws-lambda-month-report
           context:
@@ -259,14 +333,5 @@ workflows:
           # get_sls_info_key: .info.apiKeys
           # ssm_parameter_name: aws-publisher-report-apikey
           requires:
-            - approval_deploy # When Administrator Approve on Circle CI
-      # - deploy:
-      #     name: test-utils
-      #     context:
-      #       - docker-hub-pull-creds
-      #       - aws-lambda-test
-      #     target_dir: layers/test-utils
-      #     # get_sls_info_key: .info.apiKeys
-      #     # ssm_parameter_name: aws-publisher-report-apikey
-      #     requires:
-      #       - approval_deploy # When Administrator Approve on Circle CI
+            - approval_deploy
+            - build_aws_lambda # When Administrator Approve on Circle CI
