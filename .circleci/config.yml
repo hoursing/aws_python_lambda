@@ -14,7 +14,7 @@ executors:
         environment:
           SERVERLESS_VERSION: 2.72.3
           GIT_REPONAME: test-tools
-          ECR_BASE_URI: 376206943201.dkr.ecr.us-east-1.amazonaws.com #need config
+          ECR_BASE_URI: 376206943201.dkr.ecr.us-east-1.amazonaws.com
 
 commands:
   setup_environment:
@@ -39,7 +39,7 @@ commands:
     steps:
       - run:
           name: Create CheckSum
-          working_directory: ~/work/y1-tools/<< parameters.target_dir >>/
+          working_directory: ~/functions/<< parameters.target_dir >>/
           command: |
             SEED=/tmp/checksum-seed
             find ./ -type f -exec sha256sum {} \; | sort -k 2 > $SEED
