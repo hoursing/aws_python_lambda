@@ -14,10 +14,10 @@ provider:
   stackName: ${self:service}-${self:provider.stage}
   environment:
     ENV: ${opt:stage, self:custom.defaultStage}
-  cr:
-  images:
-    baseimage:
-      path: ./
+  ecr:
+    images:
+      baseimage:
+        path: ./
 
 custom:
   defaultStage: dev
