@@ -28,6 +28,6 @@ functions:
   day-report:
     name: ${self:custom.functionName}_${self:provider.stage}
     image:
-      uri: 376206943201.dkr.ecr.376206943201.amazonaws.com/test-tools/test-lambda@latest
+      uri: 376206943201.dkr.ecr.us-east-1.amazonaws.com/test-tools/test-lambda@latest
       workingDirectory: /day-report
       command: day-app-report.day_handler
