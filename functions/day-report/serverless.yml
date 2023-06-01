@@ -14,6 +14,10 @@ provider:
   stackName: test-lambda-day-report-${self:provider.stage}
   environment:
     ENV: ${opt:stage, self:custom.defaultStage}
+  cr:
+  images:
+    baseimage:
+      path: ./
 
 custom:
   defaultStage: dev
