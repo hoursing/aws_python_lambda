@@ -9,7 +9,6 @@
   "dependencies": {
     "serverless-plugin-existing-s3": "^2.4.0",
     "serverless-plugin-resource-tagging": "^1.2.0",
-    "serverless-python-requirements": "^6.0.0",
     "serverless-domain-manager": "^6.2.1",
     "serverless-offline": "^8.8.1",
     "serverless-s3-local": "^0.7.1"

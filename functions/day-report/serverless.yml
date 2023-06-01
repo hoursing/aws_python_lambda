@@ -1,5 +1,9 @@
-service: test-lambda-day-report
+service: test-lambda
 framework Version: "3"
+
+plugins:
+  - serverless-plugin-resource-tagging
+
 provider:
   name: aws
   stage: ${opt:stage, 'dev'}
@@ -7,7 +11,7 @@ provider:
   deploymentBucket:
     name: aw-lambda-test-deploy
   memorySize: 256
-  stackName: ${self:service}-${self:provider.stage}
+  stackName: test-lambda-day-report-${self:provider.stage}
   environment:
     ENV: ${opt:stage, self:custom.defaultStage}
 
