@@ -1,4 +1,4 @@
-service: test-lambda
+service: test-lambda-day-report
 framework Version: "3"
 
 plugins:
@@ -11,7 +11,7 @@ provider:
   deploymentBucket:
     name: aw-lambda-test-deploy
   memorySize: 256
-  stackName: test-lambda-day-report-${self:provider.stage}
+  stackName: ${self:service}-${self:provider.stage}
   environment:
     ENV: ${opt:stage, self:custom.defaultStage}
   cr:
@@ -33,5 +33,5 @@ functions:
     name: ${self:custom.functionName}_${self:provider.stage}
     image:
       uri: 376206943201.dkr.ecr.us-east-1.amazonaws.com/test-tools/test-lambda@latest
-      workingDirectory: /day-report
+      workingDirectory: var/task/day-report
       command: day-app-report.day_handler
