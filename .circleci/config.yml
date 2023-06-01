@@ -80,6 +80,7 @@ commands:
                 ${ECR_URI}:<< parameters.image_tag >> \
                 ${ECR_URI}:latest
               docker push ${ECR_URI} -a
+
               echo "${GIT_REPONAME}/<< parameters.image_name >>:<< parameters.image_tag >> pushed to ECR successfully."
             else
               echo "${GIT_REPONAME}/<< parameters.image_name >> :<< parameters.image_tag >> is already exists to ECR."
