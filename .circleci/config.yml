@@ -67,8 +67,8 @@ commands:
           name: Build the image and push the image to ECR.
           working_directory: ./<< parameters.target_dir >>/
           command: |
-            cp -r ../layers/y1-lambda-utils/layer/* .
-            cp ../../layers/y1-lambda-utils/requirements.txt requirements.txt
+            cp -r /layers/y1-lambda-utils/layer/* .
+            cp /layers/y1-lambda-utils/requirements.txt requirements.txt
 
             pip install -r requirements.txt -t .
 
