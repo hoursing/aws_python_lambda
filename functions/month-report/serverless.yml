@@ -10,10 +10,7 @@ provider:
   stackName: test-lambda-month-report-${self:provider.stage}
   environment:
     ENV: ${opt:stage, self:custom.defaultStage}
-  ecr: #config upload ECR
-    images:
-      aws-lambda-month:
-        path: ./
+
 custom:
   defaultStage: dev
   functionName: quy-lambda-month-report
@@ -26,6 +23,6 @@ custom:
 functions:
   day-report:
     name: ${self:custom.functionName}_${self:provider.stage}
-    image: <account>.dkr.ecr.<region>.amazonaws.com/<repository>@<digest>
+    image: 376206943201.dkr.ecr.us-east-1.amazonaws.com/test-tools/test-lambda:latest
       command:
-        - functions/month-app-report.handler
+        - month-report/month-app-report.handler
