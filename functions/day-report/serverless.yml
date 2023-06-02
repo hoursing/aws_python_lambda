@@ -14,10 +14,6 @@ provider:
   stackName: ${self:service}-${self:provider.stage}
   environment:
     ENV: ${opt:stage, self:custom.defaultStage}
-  ecr:
-    images:
-      baseimage:
-        path: ./
 
 custom:
   defaultStage: dev
@@ -32,6 +28,6 @@ functions:
   day-report:
     name: ${self:custom.functionName}_${self:provider.stage}
     image:
-      uri: 376206943201.dkr.ecr.us-east-1.amazonaws.com/test-tools/test-lambda@latest
+      uri: 376206943201.dkr.ecr.us-east-1.amazonaws.com/test-tools/test-lambda:latest
       command:
         - day-report/day-app-report.day_handler
