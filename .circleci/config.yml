@@ -67,6 +67,11 @@ commands:
           name: Build the image and push the image to ECR.
           working_directory: ./<< parameters.target_dir >>/
           command: |
+            cp -r ../layers/y1-lambda-utils/layer/* .
+            cp ../../layers/y1-lambda-utils/requirements.txt requirements.txt
+
+            pip install -r requirements.txt -t .
+
             ECR_URI=${ECR_BASE_URI}/${GIT_REPONAME}/<< parameters.image_name >>
             check=$(aws ecr list-images --repository-name ${GIT_REPONAME} --query "imageIds[*].imageTag" | jq '.[] | select(contains("'<< parameters.image_tag >>'"))')
 
