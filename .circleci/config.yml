@@ -39,7 +39,7 @@ commands:
     steps:
       - run:
           name: Create CheckSum
-          working_directory: ~/functions/<< parameters.target_dir >>/
+          working_directory: ./<< parameters.target_dir >>/
           command: |
             SEED=/tmp/checksum-seed
             find ./ -type f -exec sha256sum {} \; | sort -k 2 > $SEED
