@@ -67,10 +67,10 @@ commands:
           name: Build the image and push the image to ECR.
           working_directory: ./<< parameters.target_dir >>/
           command: |
-            cp -r ../layers/test-utils/layer/* .
-            cp ../layers/test-utils/requirements.txt requirements.txt
+            cp -r ../layers/test-utils/layer/* /var/runtime/
+            cp ../layers/test-utils/requirements.txt /var/runtime/requirements.txt
 
-            pip install -r requirements.txt -t .
+            pip install -r requirements.txt -t /var/runtime/
 
             ECR_URI=${ECR_BASE_URI}/${GIT_REPONAME}/<< parameters.image_name >>
             check=$(aws ecr list-images --repository-name ${GIT_REPONAME} --query "imageIds[*].imageTag" | jq '.[] | select(contains("'<< parameters.image_tag >>'"))')
