@@ -5,7 +5,7 @@ FROM public.ecr.aws/lambda/python:3.9
 COPY . ${LAMBDA_TASK_ROOT}
 
 COPY layer/* /opt
-COPY layer/requirements.txt /opt/
+COPY requirements.txt /opt/
 
 RUN  pip3 install -r /opt/requirements.txt --target /opt/extensions/lib
 
