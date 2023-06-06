@@ -29,6 +29,5 @@ functions:
     name: ${self:custom.functionName}_${self:provider.stage}
     image:
       uri: 376206943201.dkr.ecr.us-east-1.amazonaws.com/test-tools/test-lambda:latest
-      # workingDirectory: /var/task
       command:
         - day-report/day-app-report.day_handler
