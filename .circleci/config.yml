@@ -161,6 +161,7 @@ jobs:
           version: 20.10.18
       - docker/install-docker-credential-helper
       - aws-cli/setup
+      - setup_environment
       - create_checksum:
           target_dir: << parameters.target_dir >>
       - build_and_push_image_ecr:
