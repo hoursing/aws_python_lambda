@@ -80,7 +80,7 @@ commands:
               aws ecr get-login-password | docker login --username AWS --password-stdin ${ECR_BASE_URI}
               echo "Build << parameters.image_name >> image from << parameters.docker_file_path >>."
               docker build \
-                -t ${ECR_BASE_URI}:<< parameters.image_tag >> \
+                -t ${ECR_URI}:<< parameters.image_tag >> \
                 -f << parameters.docker_file_path >> .
               docker tag \
                 ${ECR_URI}:<< parameters.image_tag >> \
