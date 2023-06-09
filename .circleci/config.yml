@@ -44,7 +44,9 @@ commands:
             SEED=/tmp/checksum-seed
             find ./ -type f -exec sha256sum {} \; | sort -k 2 > $SEED
             CHECKSUM=$(cat $SEED | sha256sum | awk '{ print $1 }')
-            echo "export CHECKSUM=${CHECKSUM}" >> $BASH_ENV
+            echo "export CHECKSUM=${CHECKSUM}"
+            echo $CHECKSUM > ./CheckSum
+            echo "Checksum: $CHECKSUM"
 
   build_and_push_image_ecr:
     description: "Build the Docker image and push the Docker image to ECR."
