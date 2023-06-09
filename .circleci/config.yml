@@ -13,7 +13,7 @@ executors:
           password: $DOCKER_ACCESS_TOKEN
         environment:
           SERVERLESS_VERSION: 2.72.3
-          GIT_REPONAME: test-tools
+          APP_NAME: test-tools
           ECR_BASE_URI: 376206943201.dkr.ecr.us-east-1.amazonaws.com
 
 commands:
@@ -69,26 +69,25 @@ commands:
           command: |
             cp -r ../layers/test-utils/layer/* .
             cp ../layers/test-utils/requirements.txt requirements.txt
-
             pip install -r requirements.txt -t .
 
-            ECR_URI=${ECR_BASE_URI}/${GIT_REPONAME}/<< parameters.image_name >>
-            check=$(aws ecr list-images --repository-name ${GIT_REPONAME} --query "imageIds[*].imageTag" | jq '.[] | select(contains("'<< parameters.image_tag >>'"))')
+            ECR_URI=${ECR_BASE_URI}/${APP_NAME}
+            check=$(aws ecr list-images --repository-name ${APP_NAME} --query "imageIds[*].imageTag" | jq '.[] | select(contains("'<< parameters.image_tag >>'"))')
 
             if [ -z "${check}" ]; then
               aws ecr get-login-password | docker login --username AWS --password-stdin ${ECR_BASE_URI}
               echo "Build << parameters.image_name >> image from << parameters.docker_file_path >>."
               docker build \
-                -t ${ECR_URI}:<< parameters.image_tag >> \
+                -t ${ECR_BASE_URI}:<< parameters.image_tag >> \
                 -f << parameters.docker_file_path >> .
               docker tag \
                 ${ECR_URI}:<< parameters.image_tag >> \
-                ${ECR_URI}:latest
+                ${ECR_URI}:${BASH_ENV}-latest
               docker push ${ECR_URI} -a
 
-              echo "${GIT_REPONAME}/<< parameters.image_name >>:<< parameters.image_tag >> pushed to ECR successfully."
+              echo "${APP_NAME}:<< parameters.image_tag >> pushed to ECR successfully."
             else
-              echo "${GIT_REPONAME}/<< parameters.image_name >> :<< parameters.image_tag >> is already exists to ECR."
+              echo "${APP_NAME}:<< parameters.image_tag >> is already exists to ECR."
             fi
 
 jobs:
