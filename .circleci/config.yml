@@ -13,6 +13,9 @@ executors:
           password: $DOCKER_ACCESS_TOKEN
         environment:
           SERVERLESS_VERSION: 2.72.3
+          APP_NAME: test-tools
+          ECR_BASE_URI: 376206943201.dkr.ecr.us-east-1.amazonaws.com
+
 commands:
   setup_environment:
     description: "Setup environment variables."
@@ -26,6 +29,64 @@ commands:
               echo 'export ENV=stg' >> $BASH_ENV
             else
               echo 'export ENV=dev' >> $BASH_ENV
+            fi
+
+  create_checksum:
+    parameters:
+      target_dir:
+        description: "Specify the directory to create check sum"
+        type: string
+    steps:
+      - run:
+          name: Create CheckSum
+          working_directory: ./<< parameters.target_dir >>/
+          command: |
+            SEED=/tmp/checksum-seed
+            find ./ -type f -exec sha256sum {} \; | sort -k 2 > $SEED
+            CHECKSUM=$(cat $SEED | sha256sum | awk '{ print $1 }')
+            echo "export CHECKSUM=${CHECKSUM}" >> $BASH_ENV
+            echo $CHECKSUM > ./CheckSum
+            echo "Checksum: $CHECKSUM"
+
+  build_and_push_image_ecr:
+    description: "Build the Docker image and push the Docker image to ECR."
+    parameters:
+      target_dir:
+        description: "Specify the directory to deploy"
+        type: string
+      docker_file_path:
+        description: The Dockerfile path
+        type: string
+        default: ./Dockerfile
+      image_tag:
+        description: The Docker image tag to add
+        type: string
+    steps:
+      - run:
+          name: Build the image and push the image to ECR.
+          working_directory: ./<< parameters.target_dir >>/
+          command: |
+            cp -r ../layers/test-utils/layer/* .
+            cp ../layers/test-utils/requirements.txt requirements.txt
+            pip install -r requirements.txt -t .
+
+            ECR_URI=${ECR_BASE_URI}/${APP_NAME}
+            check=$(aws ecr list-images --repository-name ${APP_NAME} --query "imageIds[*].imageTag" | jq '.[] | select(contains("'<< parameters.image_tag >>'"))')
+
+            if [ -z "${check}" ]; then
+              aws ecr get-login-password | docker login --username AWS --password-stdin ${ECR_BASE_URI}
+              echo "Update ${APP_NAME} image from dockerfile."
+              docker build \
+                -t ${ECR_URI}:<< parameters.image_tag >> \
+                -f << parameters.docker_file_path >> .
+              docker tag \
+                ${ECR_URI}:<< parameters.image_tag >> \
+                ${ECR_URI}:${ENV}-latest
+              docker push ${ECR_URI} -a
+
+              echo "${APP_NAME}:<< parameters.image_tag >> pushed to ECR successfully."
+            else
+              echo "${APP_NAME}:<< parameters.image_tag >> is already exists to ECR."
             fi
 
 jobs:
@@ -83,6 +144,30 @@ jobs:
               cat result | jq '.Service'| jq -s '. |add |{"stackTags.Service": .}'
               exit 1
             fi
+
+  build:
+    parameters:
+      target_dir:
+        description: "Specify the directory to deploy"
+        type: string
+      service_name:
+        description: "Specify the service name to deploy"
+        type: string
+    executor:
+      name: python
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 20.10.18
+      - docker/install-docker-credential-helper
+      - aws-cli/setup
+      - setup_environment
+      - create_checksum:
+          target_dir: << parameters.target_dir >>
+      - build_and_push_image_ecr:
+          target_dir: << parameters.target_dir >>
+          docker_file_path: ./Dockerfile
+          image_tag: ${CHECKSUM}
 
   deploy:
     parameters:
@@ -154,21 +239,6 @@ jobs:
           name: Deploy << parameters.target_dir >> by Serverless
           working_directory: ./<< parameters.target_dir >>/
           command: |
-            if [[ << parameters.target_dir >> =~ functions ]]; then
-              deploy_flag=true
-              cp -r ../../layers/test-utils/layer/* .
-              cp ../../layers/test-utils/requirements.txt .
-
-            elif [[ << parameters.target_dir >> =~ layers ]]; then
-              if [ ! -f ./CheckSum ]; then
-                if [ -f ./requirements.txt ]; then
-                  pip install -r requirements.txt -t ${PKG_DIR}
-                  cp -r layer/* python
-                fi
-                deploy_flag=true
-              fi
-            fi
-
             sls deploy --stage ${ENV}
 
             if [ << parameters.integration_s3event >> = true ]; then
@@ -226,13 +296,25 @@ workflows:
     jobs:
       - validation_all:
           context: docker-hub-pull-creds
+      - build:
+          name: build_aws_lambda
+          filters:
+            branches:
+              only: /^(production|staging.*|hotfix\/.*|develop)$/
+          context:
+            - docker-hub-pull-creds
+            - aws-lambda-test
+          target_dir: functions
+          service_name: test-lambda
+          requires:
+            - validation_all
       - approval_deploy:
           type: approval
           filters:
             branches:
               only: /^(production|staging.*|hotfix\/.*|develop)$/
           requires:
-            - validation_all
+            - build_aws_lambda
       - deploy:
           name: aws-lambda-day-report
           context:
@@ -253,13 +335,3 @@ workflows:
           # ssm_parameter_name: aws-publisher-report-apikey
           requires:
             - approval_deploy # When Administrator Approve on Circle CI
-      # - deploy:
-      #     name: test-utils
-      #     context:
-      #       - docker-hub-pull-creds
-      #       - aws-lambda-test
-      #     target_dir: layers/test-utils
-      #     # get_sls_info_key: .info.apiKeys
-      #     # ssm_parameter_name: aws-publisher-report-apikey
-      #     requires:
-      #       - approval_deploy # When Administrator Approve on Circle CI

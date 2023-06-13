@@ -7,13 +7,10 @@ provider:
   deploymentBucket:
     name: aw-lambda-test-deploy
   memorySize: 256
-  stackName: ${self:service}-${self:provider.stage}
+  stackName: test-lambda-month-report-${self:provider.stage}
   environment:
     ENV: ${opt:stage, self:custom.defaultStage}
-  ecr: #config upload ECR
-    images:
-      aws-lambda-month:
-        path: ./
+
 custom:
   defaultStage: dev
   functionName: quy-lambda-month-report
@@ -27,8 +24,6 @@ functions:
   day-report:
     name: ${self:custom.functionName}_${self:provider.stage}
     image:
-      name: aws-lambda-month
+      uri: 376206943201.dkr.ecr.us-east-1.amazonaws.com/test-tools/test-lambda:latest
       command:
-        - month-app-report.handler
-      tags:
-        Environment: dev
+        - month-report/month-app-report.handler
