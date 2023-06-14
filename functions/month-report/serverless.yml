@@ -6,7 +6,7 @@ useDotenv: true
 provider:
   name: aws
   stage: ${opt:stage, 'dev'}
-  region: ${env:AWS_REGION, 'us-east-1'}
+  region: ${env:AWS_REGION, 'ap-northeast-1'}
   deploymentBucket:
     name: aw-lambda-test-deploy
   memorySize: 256
@@ -28,6 +28,6 @@ functions:
   day-report:
     name: ${self:custom.functionName}_${self:provider.stage}
     image:
-      uri: 133398801298.dkr.ecr.us-east-1.amazonaws.com/test-tools:${self:provider.environment.CHECK_SUM}
+      uri: 133398801298.dkr.ecr.ap-northeast-1.amazonaws.com/test-tools:${self:provider.environment.CHECK_SUM}
       command:
         - month-report/month-app-report.handler
