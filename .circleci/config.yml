@@ -52,9 +52,12 @@ commands:
             do
               if [ -d "$i" ]
               then
-                cp -r .env.${ENV} "$i"
+                cp .env.${ENV} "$i"
+                echo "$i"
               fi
             done
+
+            echo $(ls)
 
             echo "Checksum: $CHECKSUM"
 
