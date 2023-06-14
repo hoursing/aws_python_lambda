@@ -49,7 +49,6 @@ commands:
             printf "CHECKSUM='${CHECKSUM}'" > ./.env.${ENV}
 
             for i in ./
-            echo "$i"
             do
               if [ -d "$i" ]
               then
