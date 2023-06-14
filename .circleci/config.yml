@@ -14,7 +14,7 @@ executors:
         environment:
           SERVERLESS_VERSION: 2.72.3
           APP_NAME: test-tools
-          ECR_BASE_URI: 376206943201.dkr.ecr.us-east-1.amazonaws.com
+          ECR_BASE_URI: 133398801298.dkr.ecr.ap-northeast-1.amazonaws.com
 
 commands:
   setup_environment:
