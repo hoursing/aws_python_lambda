@@ -12,7 +12,7 @@ provider:
   stage: ${opt:stage, 'dev'}
   region: ${env:AWS_REGION, 'ap-northeast-1'}
   deploymentBucket:
-    name: aw-lambda-test-deploy
+    name: aw-lambda--quy-test-deploy
   memorySize: 256
   stackName: ${self:service}-${self:provider.stage}
   environment:
