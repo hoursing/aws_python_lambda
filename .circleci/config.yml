@@ -57,7 +57,7 @@ commands:
               fi
             done
 
-            echo $(ls)
+            echo $(ls -al)
             echo "Checksum: $CHECKSUM"
 
   build_and_push_image_ecr:
