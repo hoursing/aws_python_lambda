@@ -12,7 +12,7 @@ def day_handler(event, context):
     time_utc = event.get('time')
     time_jst = convert_jst(time_utc)
 
-    return 'Xin chao 12132131 TEST_LIST_PARAMETER report from AWS Lambda using Python' + sys.version + '! time '+time_jst
+    return 'Xin chao 12132131 TEST_LIST_PARAMETER report from AWS Lambda using Python' + sys.version + '! time '+str(time_jst)
 
 
 def convert_jst(now):

@@ -4,6 +4,8 @@ framework Version: "3"
 plugins:
   - serverless-plugin-resource-tagging
 
+useDotenv: true
+
 provider:
   name: aws
   stage: ${opt:stage, 'dev'}
@@ -14,6 +16,7 @@ provider:
   stackName: ${self:service}-${self:provider.stage}
   environment:
     ENV: ${opt:stage, self:custom.defaultStage}
+    CHECK_SUM: ${env:CHECKSUM}
 
 custom:
   defaultStage: dev
@@ -28,6 +31,6 @@ functions:
   day-report:
     name: ${self:custom.functionName}_${self:provider.stage}
     image:
-      uri: 376206943201.dkr.ecr.us-east-1.amazonaws.com/test-tools:${self:provider.stage}-latest
+      uri: 376206943201.dkr.ecr.us-east-1.amazonaws.com/test-tools:${self:provider.environment.CHECK_SUM}
       command:
         - day-report/day-app-report.day_handler
