@@ -1,5 +1,8 @@
 service: test-lambda-month-report
 framework Version: "3"
+
+useDotenv: true
+
 provider:
   name: aws
   stage: ${opt:stage, 'dev'}
@@ -10,6 +13,7 @@ provider:
   stackName: test-lambda-month-report-${self:provider.stage}
   environment:
     ENV: ${opt:stage, self:custom.defaultStage}
+    CHECK_SUM: ${env:CHECKSUM}
 
 custom:
   defaultStage: dev
@@ -24,6 +28,6 @@ functions:
   day-report:
     name: ${self:custom.functionName}_${self:provider.stage}
     image:
-      uri: 376206943201.dkr.ecr.us-east-1.amazonaws.com/test-tools/test-lambda:latest
+      uri: 133398801298.dkr.ecr.us-east-1.amazonaws.com/test-tools:${self:provider.environment.CHECK_SUM}
       command:
         - month-report/month-app-report.handler
