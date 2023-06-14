@@ -46,7 +46,7 @@ commands:
             CHECKSUM=$(cat $SEED | sha256sum | awk '{ print $1 }')
             echo "export CHECKSUM=${CHECKSUM}" >> $BASH_ENV
             echo $CHECKSUM > ./CheckSum
-            printf "CHECKSUM='${CHECKSUM}'" > ./.env.${ENV}
+            echo "CHECKSUM='${CHECKSUM}'" > ./.env.${ENV}
 
             for i in ./*
             do
@@ -57,8 +57,7 @@ commands:
               fi
             done
 
-            echo $(ls)
-
+            echo $(ls -al)
             echo "Checksum: $CHECKSUM"
 
   build_and_push_image_ecr:
