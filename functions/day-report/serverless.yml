@@ -31,6 +31,6 @@ functions:
   day-report:
     name: ${self:custom.functionName}_${self:provider.stage}
     image:
-      uri: 376206943201.dkr.ecr.us-east-1.amazonaws.com/test-tools:${self:provider.environment.CHECK_SUM}
+      uri: 133398801298.dkr.ecr.us-east-1.amazonaws.com/test-tools:${self:provider.environment.CHECK_SUM}
       command:
         - day-report/day-app-report.day_handler
