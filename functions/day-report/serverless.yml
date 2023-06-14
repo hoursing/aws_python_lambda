@@ -3,6 +3,7 @@ framework Version: "3"
 
 plugins:
   - serverless-plugin-resource-tagging
+  - serverless-deployment-bucket
 
 useDotenv: true
 
