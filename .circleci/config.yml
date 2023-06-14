@@ -47,7 +47,16 @@ commands:
             echo "export CHECKSUM=${CHECKSUM}" >> $BASH_ENV
             echo $CHECKSUM > ./CheckSum
             printf "CHECKSUM='${CHECKSUM}'" > ./.env.${ENV}
-            for dir in `find ./ -type d` ; do cp -r .env.${ENV} ./"$dir"/ ; done
+
+            for i in ./
+            echo "$i"
+            do
+              if [ -d "$i" ]
+              then
+                cp -r .env.${ENV} "$i"
+              fi
+            done
+
             echo "Checksum: $CHECKSUM"
 
   build_and_push_image_ecr:
