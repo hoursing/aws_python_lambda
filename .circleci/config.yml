@@ -47,7 +47,7 @@ commands:
             echo "export CHECKSUM=${CHECKSUM}" >> $BASH_ENV
             echo $CHECKSUM > ./CheckSum
             printf "CHECKSUM='${CHECKSUM}'" > .env.${ENV}
-            for d in ./; do cp .env.${ENV} "$d"; done
+            for dir in `find . -type d` ; do cp .env.${ENV} $dir/.env.${ENV} ; done
             echo "Checksum: $CHECKSUM"
 
   build_and_push_image_ecr:
@@ -71,9 +71,6 @@ commands:
             cp -r ../layers/test-utils/layer/* .
             cp ../layers/test-utils/requirements.txt requirements.txt
             pip install -r requirements.txt -t .
-
-
-
 
             ECR_URI=${ECR_BASE_URI}/${APP_NAME}
             check=$(aws ecr list-images --repository-name ${APP_NAME} --query "imageIds[*].imageTag" | jq '.[] | select(contains("'<< parameters.image_tag >>'"))')
