@@ -252,6 +252,8 @@ jobs:
           working_directory: ./<< parameters.target_dir >>/
           command: |
             echo "CHECKSUM='${CHECKSUM}'" > ./.env.${ENV}
+            echo "Checksum: $CHECKSUM"
+            echo $(ls)
 
             sls deploy --stage ${ENV}
 
