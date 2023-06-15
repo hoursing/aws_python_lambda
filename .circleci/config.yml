@@ -209,7 +209,8 @@ jobs:
       - run:
           name: Get Checksum workspace
           command: |
-            CHECKSUM="$(cat ./CheckSum)"
+            echo $(ls)
+            CHECKSUM="$(cat CheckSum)"
             echo "CHECKSUM='${CHECKSUM}'" > .env.$BASH_ENV
       - aws-cli/setup
       - run:
