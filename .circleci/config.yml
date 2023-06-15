@@ -47,6 +47,7 @@ commands:
             echo "export CHECKSUM=${CHECKSUM}" >> $BASH_ENV
             echo $CHECKSUM > ./CheckSum
             echo "CHECKSUM='${CHECKSUM}'" > ./.env.${ENV}
+            echo $(pwd)
             echo "Checksum: $CHECKSUM"
 
   build_and_push_image_ecr:
@@ -168,7 +169,7 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - .env.${ENV}
+            - ./.env.${ENV}
       - build_and_push_image_ecr:
           target_dir: << parameters.target_dir >>
           docker_file_path: ./Dockerfile
