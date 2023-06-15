@@ -169,7 +169,7 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - ./.env.${ENV}
+            - ${HOME}/project/functions/.env.${ENV}
       - build_and_push_image_ecr:
           target_dir: << parameters.target_dir >>
           docker_file_path: ./Dockerfile
