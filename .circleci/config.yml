@@ -46,9 +46,6 @@ commands:
             CHECKSUM=$(cat $SEED | sha256sum | awk '{ print $1 }')
             echo "export CHECKSUM=${CHECKSUM}" >> $BASH_ENV
             echo $CHECKSUM > ./CheckSum
-            echo "CHECKSUM='${CHECKSUM}'" > ./.env.${ENV}
-            echo $(pwd)
-            echo $(ls)
             echo "Checksum: $CHECKSUM"
 
   build_and_push_image_ecr:
@@ -212,8 +209,8 @@ jobs:
       - run:
           name: Get Checksum workspace
           command: |
-            cat .env.${ENV} > $CHECKSUM
-            echo "Checksum: $CHECKSUM"
+            cat ./CheckSum > $CHECKSUM
+            echo "CHECKSUM='${CHECKSUM}'" > .env.$BASH_ENV
       - aws-cli/setup
       - run:
           name: Setup nodejs
