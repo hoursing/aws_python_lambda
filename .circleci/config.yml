@@ -210,8 +210,7 @@ jobs:
           name: Get Checksum workspace
           command: |
             CHECKSUM="$(cat CheckSum)"
-            echo "CHECKSUM='${CHECKSUM}'" > ./.env.${ENV}
-            echo $(ls)
+            echo "export CHECKSUM=${CHECKSUM}" >> $BASH_ENV
       - aws-cli/setup
       - run:
           name: Setup nodejs
@@ -251,8 +250,9 @@ jobs:
           name: Deploy << parameters.target_dir >> by Serverless
           working_directory: ./<< parameters.target_dir >>/
           command: |
-            sls deploy --stage ${ENV}
+            echo "CHECKSUM='${CHECKSUM}'" > ./.env.${ENV}
 
+            sls deploy --stage ${ENV}
             if [ << parameters.integration_s3event >> = true ]; then
               sls s3deploy --stage ${ENV}
             fi
