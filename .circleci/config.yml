@@ -167,9 +167,9 @@ jobs:
       - create_checksum:
           target_dir: << parameters.target_dir >>
       - persist_to_workspace:
-          root: .
+          root: ${HOME}/project/functions
           paths:
-            - ${HOME}/project/functions/.env.${ENV}
+            - .env.${ENV}
       - build_and_push_image_ecr:
           target_dir: << parameters.target_dir >>
           docker_file_path: ./Dockerfile
