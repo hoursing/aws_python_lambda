@@ -209,9 +209,9 @@ jobs:
       - run:
           name: Get Checksum workspace
           command: |
-            echo $(ls)
             CHECKSUM="$(cat CheckSum)"
-            echo "CHECKSUM='${CHECKSUM}'" > .env.$BASH_ENV
+            echo "CHECKSUM='${CHECKSUM}'" > ./.env.${ENV}
+            echo $(ls)
       - aws-cli/setup
       - run:
           name: Setup nodejs
