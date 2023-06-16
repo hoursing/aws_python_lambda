@@ -264,12 +264,11 @@ jobs:
           name: Create .env.${ENV} for ECR
           command: |
             echo "CHECKSUM='${CHECKSUM_ECR}'" > ./.env.${ENV}
+            echo ${CHECKSUM_ECR}
       - run:
           name: Deploy << parameters.target_dir >> by Serverless
           working_directory: ./<< parameters.target_dir >>/
           command: |
-            echo "CHECKSUM='${CHECKSUM}'" > ./.env.${ENV}
-
             sls deploy --stage ${ENV}
             if [ << parameters.integration_s3event >> = true ]; then
               sls s3deploy --stage ${ENV}
