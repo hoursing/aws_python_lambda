@@ -14,7 +14,7 @@ executors:
         environment:
           SERVERLESS_VERSION: 2.72.3
           APP_NAME: test-tools
-          ECR_BASE_URI: 376206943201.dkr.ecr.us-east-1.amazonaws.com
+          ECR_BASE_URI: 133398801298.dkr.ecr.ap-northeast-1.amazonaws.com
 
 commands:
   setup_environment:
@@ -164,6 +164,10 @@ jobs:
       - setup_environment
       - create_checksum:
           target_dir: << parameters.target_dir >>
+      - persist_to_workspace:
+          root: ./functions
+          paths:
+            - CheckSum
       - build_and_push_image_ecr:
           target_dir: << parameters.target_dir >>
           docker_file_path: ./Dockerfile
@@ -200,6 +204,13 @@ jobs:
           keys:
             - node-module-{{ checksum "package.json" }}
       - setup_environment
+      - attach_workspace:
+          at: .
+      - run:
+          name: Get Checksum workspace
+          command: |
+            CHECKSUM="$(cat CheckSum)"
+            echo "export CHECKSUM=${CHECKSUM}" >> $BASH_ENV
       - aws-cli/setup
       - run:
           name: Setup nodejs
@@ -239,8 +250,9 @@ jobs:
           name: Deploy << parameters.target_dir >> by Serverless
           working_directory: ./<< parameters.target_dir >>/
           command: |
-            sls deploy --stage ${ENV}
+            echo "CHECKSUM='${CHECKSUM}'" > ./.env.${ENV}
 
+            sls deploy --stage ${ENV}
             if [ << parameters.integration_s3event >> = true ]; then
               sls s3deploy --stage ${ENV}
             fi
@@ -268,7 +280,7 @@ jobs:
                     else
                       cp ${SSM_INFO_JSON_FILENAME} ${OUTPUT_FILE}
                     fi
-                    aws ssm put-parameter \
+                      aws ssm put-parameter \
                       --name "${SSM_PARAMETER_NAME}"-"${ENV}" \
                       --value file://"${OUTPUT_FILE}" \
                       --type SecureString --overwrite
