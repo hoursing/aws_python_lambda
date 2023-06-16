@@ -262,6 +262,7 @@ jobs:
             echo "export CHECKSUM_ECR=${CHECKSUM_ECR}" >> $BASH_ENV
       - run:
           name: Create .env.${ENV} for ECR
+          working_directory: ./<< parameters.target_dir >>/
           command: |
             echo "CHECKSUM='${CHECKSUM_ECR}'" > ./.env.${ENV}
             echo ${CHECKSUM_ECR}
