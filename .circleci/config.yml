@@ -38,15 +38,31 @@ commands:
         type: string
     steps:
       - run:
-          name: Create CheckSum
+          name: Create CheckSum for ECR
           working_directory: ./<< parameters.target_dir >>/
           command: |
             SEED=/tmp/checksum-seed
             find ./ -type f -exec sha256sum {} \; | sort -k 2 > $SEED
             CHECKSUM=$(cat $SEED | sha256sum | awk '{ print $1 }')
             echo "export CHECKSUM=${CHECKSUM}" >> $BASH_ENV
-            echo $CHECKSUM > ./CheckSum
+            echo $CHECKSUM > ./CheckSumECR
             echo "Checksum: $CHECKSUM"
+
+  create_layer:
+    parameters:
+      target_dir:
+        description: "Create layer for lambda"
+        type: string
+    steps:
+      - run:
+          name: Create layer for lambda
+          working_directory: ./<< parameters.target_dir >>/
+          command: |
+            cp -r ../layers/test-utils/layer/* .
+            cp ../layers/test-utils/requirements.txt requirements.txt
+            pip install -r requirements.txt -t .
+
+            echo "Add layer successfully to << parameters.target_dir >>"
 
   build_and_push_image_ecr:
     description: "Build the Docker image and push the Docker image to ECR."
@@ -66,10 +82,6 @@ commands:
           name: Build the image and push the image to ECR.
           working_directory: ./<< parameters.target_dir >>/
           command: |
-            cp -r ../layers/test-utils/layer/* .
-            cp ../layers/test-utils/requirements.txt requirements.txt
-            pip install -r requirements.txt -t .
-
             ECR_URI=${ECR_BASE_URI}/${APP_NAME}
             check=$(aws ecr list-images --repository-name ${APP_NAME} --query "imageIds[*].imageTag" | jq '.[] | select(contains("'<< parameters.image_tag >>'"))')
 
@@ -162,16 +174,18 @@ jobs:
       - docker/install-docker-credential-helper
       - aws-cli/setup
       - setup_environment
+      - create_layer:
+          target_dir: << parameters.target_dir >>
       - create_checksum:
           target_dir: << parameters.target_dir >>
-      - persist_to_workspace:
-          root: ./functions
-          paths:
-            - CheckSum
       - build_and_push_image_ecr:
           target_dir: << parameters.target_dir >>
           docker_file_path: ./Dockerfile
           image_tag: ${CHECKSUM}
+      - persist_to_workspace:
+          root: ./functions
+          paths:
+            - CheckSumECR
 
   deploy:
     parameters:
@@ -204,13 +218,6 @@ jobs:
           keys:
             - node-module-{{ checksum "package.json" }}
       - setup_environment
-      - attach_workspace:
-          at: .
-      - run:
-          name: Get Checksum workspace
-          command: |
-            CHECKSUM="$(cat CheckSum)"
-            echo "export CHECKSUM=${CHECKSUM}" >> $BASH_ENV
       - aws-cli/setup
       - run:
           name: Setup nodejs
@@ -246,6 +253,17 @@ jobs:
           name: Restoring cache (CheckSum.env)
           keys:
           - checkSum-env-cache-v2-{{ checksum "./<< parameters.target_dir >>/Cache.env" }}
+      - attach_workspace:
+          at: .
+      - run:
+          name: Get Checksum from workspace
+          command: |
+            CHECKSUM_ECR="$(cat CheckSumECR)"
+            echo "export CHECKSUM_ECR=${CHECKSUM_ECR}" >> $BASH_ENV
+      - run:
+          name: Create .env.${ENV} for ECR
+          command: |
+            echo "CHECKSUM='${CHECKSUM_ECR}'" > ./.env.${ENV}
       - run:
           name: Deploy << parameters.target_dir >> by Serverless
           working_directory: ./<< parameters.target_dir >>/
