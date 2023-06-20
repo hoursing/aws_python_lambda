@@ -256,7 +256,7 @@ jobs:
       - attach_workspace:
           at: .
       - run:
-          name: Get Checksum from workspace
+          name: Restore Checksum from workspace
           command: |
             CHECKSUM_ECR="$(cat CheckSumECR)"
             echo "export CHECKSUM_ECR=${CHECKSUM_ECR}" >> $BASH_ENV
