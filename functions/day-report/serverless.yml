@@ -1,0 +1,36 @@
+service: test-lambda-day-report
+framework Version: "3"
+
+plugins:
+  - serverless-plugin-resource-tagging
+
+useDotenv: true
+
+provider:
+  name: aws
+  stage: ${opt:stage, 'dev'}
+  region: ${env:AWS_REGION, 'ap-northeast-1'}
+  deploymentBucket:
+    name: aw-lambda--quy-test-deploy
+  memorySize: 256
+  stackName: ${self:service}-${self:provider.stage}
+  environment:
+    ENV: ${opt:stage, self:custom.defaultStage}
+    CHECK_SUM: ${env:CHECKSUM}
+
+custom:
+  defaultStage: dev
+  functionName: quy-lambda-day-report
+  config:
+    dev:
+      stage_formal: dev
+    stg:
+      stage_formal: staging
+
+functions:
+  day-report:
+    name: ${self:custom.functionName}_${self:provider.stage}
+    image:
+      uri: 133398801298.dkr.ecr.ap-northeast-1.amazonaws.com/test-tools:${self:provider.environment.CHECK_SUM}
+      command:
+        - day-report/day-app-report.day_handler
