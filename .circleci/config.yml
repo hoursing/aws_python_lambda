@@ -364,7 +364,7 @@ workflows:
           name: build_aws_lambda
           filters:
             branches:
-              only: /^(production|staging.*|hotfix\/.*|develop)$/
+              only: /^(master|production|staging.*|hotfix\/.*|develop)$/
           context:
             - docker-hub-pull-creds
             - aws-lambda-test
@@ -376,7 +376,7 @@ workflows:
           type: approval
           filters:
             branches:
-              only: /^(production|staging.*|hotfix\/.*|develop)$/
+              only: /^(master|production|staging.*|hotfix\/.*|develop)$/
           requires:
             - build_aws_lambda
       - deploy:
