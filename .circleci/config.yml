@@ -50,24 +50,21 @@ commands:
   install_layer:
     parameters:
       target_dir:
-        description: "Create layer for lambda"
+        description: "Install layer for lambda"
         type: string
     steps:
       - run:
           name: Create layer for lambda
           working_directory: ./<< parameters.target_dir >>/
           command: |
-            echo $(pwd)
             for dir in */; do
               if [ -d "$dir" ]; then
-                echo $(pwd)
                  if [ -f ./"$dir"/requirements.txt ]; then
                    pip install -r ./"$dir"/requirements.txt -t ./"$dir"/
                    echo "Add layer successfully to $dir"
                  fi
               fi
             done
-
 
   create_layer:
     parameters:
