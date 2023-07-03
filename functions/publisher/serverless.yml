@@ -14,7 +14,7 @@ provider:
   region: ap-northeast-1
   memorySize: 512
   deploymentBucket:
-    name: aw-lambda--quy-test-deploy
+    name: aw-lambda-quy-test-deploy
   stackName: ${self:service}-${self:provider.stage}
   stackTags:
     Billing Dept: test
@@ -32,6 +32,7 @@ provider:
 custom:
   defaultStage: dev
   customDomain:
+    domainName: ${self:custom.config.${self:provider.stage}.domainName}
     basePath: ""
     stage: ${self:provider.stage}
     createRoute53Record: false
@@ -43,18 +44,21 @@ custom:
   config:
     dev:
       logLevel: DEBUG
+      domainName: development-report.test.com
       environment: development
       bucket: test-publisher-report-dev
       rest_api_id: 1111
       root_resource_id: 11111
     stg:
       logLevel: INFO
+      domainName: development-report.test.com
       environment: staging
       bucket: test-publisher-report-stg
       rest_api_id: 222222
       root_resource_id: 22222
     prod:
       logLevel: INFO
+      domainName: development-report.test.com
       environment: production
       bucket: test-publisher-report-report
       rest_api_id: 33333
