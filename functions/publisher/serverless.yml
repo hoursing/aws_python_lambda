@@ -2,7 +2,6 @@ service: publisher-report
 
 plugins:
   - serverless-domain-manager
-  - ./serverless-plugin-info-json-1.0.2-v2
   - serverless-plugin-resource-tagging
   - serverless-offline
   - serverless-s3-local
