@@ -35,7 +35,7 @@ custom:
     domainName: ${self:custom.config.${self:provider.stage}.domainName}
     basePath: ""
     stage: ${self:provider.stage}
-    certificateArn: arn:aws:iam::133398801298:user/quy
+    certificateArn: arn:aws:acm:ap-northeast-1:133398801298:certificate/36b57b38-d671-4f99-b335-b409e790a375
     createRoute53Record: false
     endpointType: regional
     autoDomain: true
@@ -45,21 +45,21 @@ custom:
   config:
     dev:
       logLevel: DEBUG
-      domainName: development-report.test.com
+      domainName: development-report.testdemo.com
       environment: development
       bucket: test-publisher-report-dev
       rest_api_id: 1111
       root_resource_id: 11111
     stg:
       logLevel: INFO
-      domainName: development-report.test.com
+      domainName: development-report.testdemo.com
       environment: staging
       bucket: test-publisher-report-stg
       rest_api_id: 222222
       root_resource_id: 22222
     prod:
       logLevel: INFO
-      domainName: development-report.test.com
+      domainName: development-report.testdemo.com
       environment: production
       bucket: test-publisher-report-report
       rest_api_id: 33333
