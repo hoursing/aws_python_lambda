@@ -35,6 +35,7 @@ custom:
     domainName: ${self:custom.config.${self:provider.stage}.domainName}
     basePath: ""
     stage: ${self:provider.stage}
+    certificateArn: arn:aws:iam::133398801298:user/quy
     createRoute53Record: false
     endpointType: regional
     autoDomain: true
