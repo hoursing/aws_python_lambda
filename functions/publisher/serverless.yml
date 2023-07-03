@@ -69,8 +69,7 @@ functions:
     image:
       uri: 133398801298.dkr.ecr.ap-northeast-1.amazonaws.com/test-tools:${self:provider.environment.CHECK_SUM}
       command:
-        - publisher/publihser-report.handler
-    role: ${self:custom.config.${self:provider.stage}.role}
+        - publisher/publisher-report.handler
     timeout: 5
     reservedConcurrency: 20
     events:
