@@ -386,7 +386,7 @@ workflows:
           # ssm_parameter_name: aws-publisher-report-apikey
           requires:
             - approval_deploy # When Administrator Approve on Circle CI
-       - deploy:
+      - deploy:
           name: aws-lambda-publisher
           context:
             - docker-hub-pull-creds
