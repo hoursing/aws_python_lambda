@@ -32,7 +32,6 @@ provider:
 custom:
   defaultStage: dev
   customDomain:
-    domainName: ${self:custom.config.${self:provider.stage}.domainName}
     basePath: ""
     stage: ${self:provider.stage}
     createRoute53Record: false
