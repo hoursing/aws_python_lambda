@@ -54,7 +54,7 @@ commands:
         type: string
     steps:
       - run:
-          name: Create layer for lambda
+          name: Install layer for lambda"
           working_directory: ./<< parameters.target_dir >>/
           command: |
             for dir in */; do
@@ -81,16 +81,6 @@ commands:
             pip install -r requirements.txt -t .
 
             echo "Add layer successfully to << parameters.target_dir >>"
-
-            for dir in ./*; do
-              if [ -d "$dir" ]; then
-                 if [ -f ./requirements.txt ]; then
-                   pip install -r requirements.txt -t "$dir"
-                   echo $(ls)
-                   echo "Add layer successfully to $dir"
-                 fi
-              fi
-            done
 
 
   build_and_push_image_ecr:
