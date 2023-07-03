@@ -392,7 +392,5 @@ workflows:
             - docker-hub-pull-creds
             - aws-lambda-test
           target_dir: functions/publisher
-          # get_sls_info_key: .info.apiKeys
-          # ssm_parameter_name: aws-publisher-report-apikey
           requires:
             - approval_deploy # When Administrator Approve on Circle CI
