@@ -23,7 +23,7 @@ custom:
   functionName: quy-lambda-day-report
   config:
     dev:
-      stage_formal: dev
+      stage_formal: develop
     stg:
       stage_formal: staging
 
