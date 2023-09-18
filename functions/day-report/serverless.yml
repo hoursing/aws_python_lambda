@@ -8,7 +8,7 @@ useDotenv: true
 
 provider:
   name: aws
-  stage: ${opt:stage, 'dev'}
+  stage: ${opt:stage, ${self:custom.defaultStage}}
   region: ${env:AWS_REGION, 'ap-northeast-1'}
   deploymentBucket:
     name: aw-lambda--quy-test-deploy
@@ -23,7 +23,7 @@ custom:
   functionName: quy-lambda-day-report
   config:
     dev:
-      stage_formal: dev
+      stage_formal: develop
     stg:
       stage_formal: staging
 
@@ -32,5 +32,6 @@ functions:
     name: ${self:custom.functionName}_${self:provider.stage}
     image:
       uri: 133398801298.dkr.ecr.ap-northeast-1.amazonaws.com/test-tools:${self:provider.environment.CHECK_SUM}
+      workingDirectory: /var/task/day-report
       command:
-        - day-report/day-app-report.day_handler
+        - day-app-report.day_handler

@@ -1,12 +1,16 @@
-import os
 import sys
 from demo.test_layer import Test
 from datetime import datetime, timedelta
+from test_day import Person
 
 test = Test("Hello world DAY Report")
 # ssmTest = SsmTest()
 
+
 def day_handler(event, context):
+    person = Person()
+    person.get_name()
+
     test.getName()
 
     time_utc = event.get('time')
